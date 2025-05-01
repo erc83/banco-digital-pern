@@ -26,3 +26,26 @@ export const newUser = async (user) => {
     return result.rows[0];
 }
 
+export const login = async (rut) => {
+    const result = await pool.query(
+        `SELECT id, rut, password FROM users WHERE rut = $1`,
+        [rut]
+    );
+    return result.rows[0];
+}
+
+export const updateUserDB = async( data, id ) => {
+    const result = await pool.query(
+        `UPDATE users SET name = $1, rut = $2, email = $3, address = $4 WHERE id = ${id} RETURNING *`,
+        data
+    );
+    return result.rows[0];
+}
+
+export const deleteUserDB = async( id ) => {
+    const result = await pool.query(
+        `DELETE FROM users WHERE id = $1 RETURNING *`,
+        [id]
+    );
+    return result.rowCount
+}
