@@ -49,3 +49,61 @@ export const deleteUserDB = async( id ) => {
     );
     return result.rowCount
 }
+
+//--------------------------
+// Dashboard
+//--------------------------
+
+export const newTransferDB = async( { name, email, rut, comment, amount, account }, id ) => {   
+    try {
+        const resultDestino = await pool.query(
+            //`SELECT * FROM users WHERE account = '${account}' AND email = '${email}' AND rut = '${rut}'`
+            `SELECT id, account, name, email, rut FROM users WHERE account = $1 AND email = $2 AND rut = $3`,
+            [account, email, rut]
+        );
+  
+        if ( resultDestino.rowCount === 0 ) {
+            throw "No se consiguio ningun usuario de destino con esos datos";
+        }
+
+        const destinatario = resultDestino.rows[0];
+        const { id: id_to } = destinatario;
+        if (id == id_to) throw "No puede transferirse a usted mismo";
+
+        const resultOrigen = await pool.query(
+            `SELECT balance FROM users WHERE id = $1`,
+            [id]
+        )
+        const balanceOrigen = Number(resultOrigen.rows[0].balance);
+        if(balanceOrigen < amount){
+            throw "Saldo insuficiente para realizar la transferencia"
+        }
+
+        // Transferencia
+        await pool.query(`BEGIN`);
+        
+        await pool.query(
+            `UPDATE users SET balance = balance - $1 WHERE id = $2`,
+            [Number(amount), id]
+        );
+        
+        await pool.query(
+            `UPDATE users SET balance = balance + $1 WHERE id = $2`,
+            [Number(amount), id_to]
+        );
+
+        await pool.query(
+            `INSERT INTO transfers (date, id_from, id_to, comment, amount) values ( now(), $1, $2, $3, $4)`,
+            [id, id_to, comment, amount]
+        );
+
+        await pool.query(`COMMIT`);
+
+        return destinatario
+
+    } catch (error) {
+        await pool.query('ROLLBACK');
+        console.error("Error en la transferencia:", error);
+        throw error; 
+    }
+}

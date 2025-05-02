@@ -1,7 +1,6 @@
 import 'dotenv/config'
 import express from "express"
 import cors from "cors";
-//const jwt = require('jsonwebtoken');
 
 import path from 'path';
 import { fileURLToPath } from "url";
@@ -13,6 +12,7 @@ const app = express();
 const port = process.env.PORT || 4000;
 
 import authRouter from "./routes/auth.js";
+import dashboardRouter from './routes/dashboard.js'
 
 app.use(cors());
 
@@ -23,6 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 app.use('/auth', authRouter)
+app.use('/dashboard', dashboardRouter )
 
 app.get("/", (req, res) => {
     res.send("Blocked")
