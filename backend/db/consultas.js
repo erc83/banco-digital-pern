@@ -107,3 +107,20 @@ export const newTransferDB = async( { name, email, rut, comment, amount, account
         throw error; 
     }
 }
+
+export const getTranfersDB = async ( id ) => {
+    const result = await pool.query(
+        `SELECT trs.id
+            ,date
+            ,id_from
+            ,name
+            ,comment
+            ,trs.amount 
+        FROM transfers AS trs 
+        INNER JOIN users AS u 
+        ON trs.id_to = u.id 
+        WHERE trs.id_from = $1`,
+        [id]
+    );
+    return result.rows;
+}

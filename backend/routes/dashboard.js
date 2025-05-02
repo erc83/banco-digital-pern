@@ -1,5 +1,5 @@
 import express from 'express'
-import { newTransfer } from '../controllers/dashboard.js';
+import { newTransfer, getTransfers } from '../controllers/dashboard.js';
 import { validateJWT } from '../middlewares/validate-jwt.js';
 import { check } from 'express-validator';
 import { validateFields } from '../middlewares/validateFields.js';
@@ -23,6 +23,7 @@ router.post('/transfer/:id',
     newTransfer
 )
 
+router.get('/', getTransfers);
 
 
 export default router
