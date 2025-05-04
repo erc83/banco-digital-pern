@@ -99,7 +99,15 @@ export const newTransferDB = async( { name, email, rut, comment, amount, account
 
         await pool.query(`COMMIT`);
 
-        return destinatario
+        return {
+            id_from: Number(id),
+            id_to,
+            amount,
+            comment,
+            name: destinatario.name,
+            email: destinatario.email,
+            rut: destinatario.rut
+        }
 
     } catch (error) {
         await pool.query('ROLLBACK');
@@ -124,3 +132,39 @@ export const getTranfersDB = async ( id ) => {
     );
     return result.rows;
 }
+
+export const getTranferDetailDB = async ( id, { id_to, amount, comment} ) => {
+    const result = await pool.query(
+        `SELECT trs.id
+            ,date
+            ,id_from
+            ,name
+            ,comment
+            ,trs.amount 
+        FROM transfers AS trs 
+        INNER JOIN users AS u 
+        ON trs.id_to = u.id 
+        WHERE trs.id_from = $1 
+        AND trs.id_to = $2 
+        AND trs.amount = $3
+        ORDER BY date DESC LIMIT 1`,
+        [id ,id_to, amount]
+    );
+    return result.rows[0];
+}
+
+export const getUserDetailDB = async ( id ) => {
+    const result = await pool.query(
+        `SELECT id
+            ,name
+            ,email
+            ,rut
+            ,address
+            ,account 
+        FROM users
+        WHERE id = $1`,
+        [id]
+    );
+    return result.rows[0];
+}
+

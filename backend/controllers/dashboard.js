@@ -1,19 +1,19 @@
 import { response } from 'express';
-import { newTransferDB, getTranfersDB } from '../db/consultas.js';
+import { newTransferDB, getTranfersDB, getTranferDetailDB, getUserDetailDB} from '../db/consultas.js';
 
 const newTransfer = async (req, res = response ) => {
     
     const transfer = req.body;
     
     try {
-        const { id }  = req.params
+        const { id: id_from }  = req.params
 
-        const { id: id_to, ...user_to } = await newTransferDB( transfer, id );
+        const transferUser = await newTransferDB( transfer, id_from );
 
         res.status(201).json({
             ok: true,
             message: `transferencia realizada con éxito`,
-            user: user_to
+            newTransfer: transferUser
         })
 
     } catch (error) {
@@ -59,7 +59,47 @@ const getTransfers = async( req, res = response) => {
     }
 }
 
+const getTransferDetail = async (req, res = response ) => {
+    const { id_to, amount, comment} = req.body;
+    const userId = req.uid;
+    
+    try {
+        let transfer = await getTranferDetailDB(userId, { id_to, amount, comment});
+        res.status(201).json({
+            ok: true,
+            message: 'Consulta a transferencia correctamente',
+            transfer
+        });
+    } catch (error) {
+        console.error("Error al obtener transferencia:", error);
+        res.status(500).json({ 
+            ok: false,
+            message: 'Error al obtener la transferencia'
+        });
+    }
+}
+
+const getUserDetail = async (req, res = response) => {
+    const userId = req.uid
+    try {
+        let userPerfil = await getUserDetailDB(userId);
+        res.status(201).json({
+            ok: true,
+            message: 'Consulta perfil correctamente',
+            user: userPerfil
+        });
+    } catch (error) {
+        console.error("Error al obtener transferencia:", error);
+        res.status(500).json({ 
+            ok: false,
+            message: 'Error al obtener datos usuario'
+        });
+    }
+}
+
 export {
     newTransfer,
-    getTransfers
+    getTransfers,
+    getTransferDetail,
+    getUserDetail,
 }

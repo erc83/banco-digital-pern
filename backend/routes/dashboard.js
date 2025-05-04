@@ -1,5 +1,5 @@
 import express from 'express'
-import { newTransfer, getTransfers } from '../controllers/dashboard.js';
+import { newTransfer, getTransfers, getTransferDetail, getUserDetail } from '../controllers/dashboard.js';
 import { validateJWT } from '../middlewares/validate-jwt.js';
 import { check } from 'express-validator';
 import { validateFields } from '../middlewares/validateFields.js';
@@ -24,6 +24,10 @@ router.post('/transfer/:id',
 )
 
 router.get('/', getTransfers);
+
+router.get('/transfer-detail', getTransferDetail);
+
+router.get('/perfil', getUserDetail)
 
 
 export default router
